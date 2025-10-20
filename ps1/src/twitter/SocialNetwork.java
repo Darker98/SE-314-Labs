@@ -3,9 +3,14 @@
  */
 package twitter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * SocialNetwork provides methods that operate on a social network.
@@ -41,7 +46,29 @@ public class SocialNetwork {
      *         either authors or @-mentions in the list of tweets.
      */
     public static Map<String, Set<String>> guessFollowsGraph(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+        Map<String, Set<String>> graph = new HashMap<>();
+        
+        // Pattern to detect mentions
+        Pattern mentionPattern = Pattern.compile("@(\\w+)"); 
+        
+        // Look for mentions
+        for (Tweet t : tweets) {
+            String author = t.getAuthor().toLowerCase();
+            String text = t.getText().toLowerCase();
+            
+            // Find mentions 
+            Matcher m = mentionPattern.matcher(text);
+            while (m.find()) {
+                String mentioned = m.group(1);
+                if (!mentioned.equals(author)) { // skip self-mentions
+                    // Add mentioned user to author's follow list
+                    graph.putIfAbsent(author, new HashSet<>());
+                    graph.get(author).add(mentioned);
+                }
+            }
+        }
+
+        return graph;
     }
 
     /**
@@ -54,7 +81,22 @@ public class SocialNetwork {
      *         descending order of follower count.
      */
     public static List<String> influencers(Map<String, Set<String>> followsGraph) {
-        throw new RuntimeException("not implemented");
-    }
+        Map<String, Integer> followers = new HashMap<>();
 
+        // Count followers for each user
+        for (String follower : followsGraph.keySet()) {
+            for (String followed : followsGraph.get(follower)) {
+                followers.put(followed, followers.getOrDefault(followed, 0) + 1);
+            }
+            
+            // Ensure everyone appears even if they follow but are not followed
+            followers.putIfAbsent(follower, followers.getOrDefault(follower, 0));
+        }
+
+        // Sort by follower count (highest first)
+        List<String> sorted = new ArrayList<>(followers.keySet());
+        sorted.sort((a, b) -> followers.get(b) - followers.get(a));
+
+        return sorted;
+    }
 }
