@@ -138,67 +138,90 @@ public class ConcreteVerticesGraph implements Graph<String> {
         return Collections.unmodifiableMap(new HashMap<>(v.targets));
     }
     
-    // TODO toString()
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Vertices:\n");
+
+        // Consistent ordering for deterministic output
+        List<String> labels = new ArrayList<>();
+        for (Vertex v : vertices) {
+            labels.add(v.getLabel());
+        }
+        Collections.sort(labels);
+
+        for (String label : labels) {
+            Vertex v = getVertex(label);
+            sb.append(label).append(" -> ").append(v.targets.toString()).append("\n");
+        }
+
+        return sb.toString();
+    }
     
 }
 
-/**
- * TODO specification
- * Mutable.
- * This class is internal to the rep of ConcreteVerticesGraph.
- * 
- * <p>PS2 instructions: the specification and implementation of this class is
- * up to you.
- */
 class Vertex {
-    
+
     final String label;
     final Map<String, Integer> targets = new HashMap<>();
-    
+
     // Abstraction function:
     //   A vertex labelled 'label' with outgoing edges defined by targets
-    
+
     // Representation invariant:
     //   - label != null
-    //	 - targets != null
-    //	 - all weights > 0
-    
+    //   - targets != null
+    //   - all weights > 0
+
     // Safety from rep exposure:
     //   - targets map never exposed outside
-    
+
     // Constructor
     Vertex(String label) {
         this.label = Objects.requireNonNull(label);
     }
-    
-    // checkRep
+
+    // check invariant
     public static void checkRep(List<Vertex> vertices) {
-        // No null vertices
         for (Vertex v : vertices) {
-            if (v == null) {
+            if (v == null)
                 throw new AssertionError("Vertex list contains null entry.");
-            }
         }
 
-        // No duplicate labels
+        // ensure uniqueness of labels
         for (int i = 0; i < vertices.size(); i++) {
             for (int j = i + 1; j < vertices.size(); j++) {
                 if (vertices.get(i).getLabel().equals(vertices.get(j).getLabel())) {
-                    throw new AssertionError("Duplicate vertex label found: " + vertices.get(i).getLabel());
+                    throw new AssertionError("Duplicate vertex label found: "
+                                             + vertices.get(i).getLabel());
                 }
             }
         }
     }
-    
-    // methods
-    public String getLabel() {
-    	return label;
+
+    public int addTarget(String target, int weight) {
+        if (weight <= 0) throw new IllegalArgumentException("Weight must be > 0");
+
+        Integer prev = targets.put(target, weight);
+
+        assert weight > 0;
+        return prev == null ? 0 : prev;
     }
-    
-    // toString()
+
+
+    public int removeTarget(String target) {
+        Integer prev = targets.remove(target);
+        return prev == null ? 0 : prev;
+    }
+
+    // getter
+    public String getLabel() {
+        return label;
+    }
+
     @Override
     public String toString() {
         return label + " -> " + targets.toString();
     }
-    
 }
+
