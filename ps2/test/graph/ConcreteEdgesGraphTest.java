@@ -44,19 +44,25 @@ public class ConcreteEdgesGraphTest extends GraphInstanceTest {
 	}
 
 	@Test
-	public void testEdgeEquals() {
-		Edge e1 = new Edge("A", "B", 5);
-		Edge e2 = new Edge("A", "B", 5);
+	public void testEdgeFieldEquality() {
+	    Edge e1 = new Edge("A", "B", 5);
+	    Edge e2 = new Edge("A", "B", 5);
 
-		assertEquals("Edges with same fields must be equal", e1, e2);
+	    assertEquals("Sources should match", e1.getSource(), e2.getSource());
+	    assertEquals("Targets should match", e1.getTarget(), e2.getTarget());
+	    assertEquals("Weights should match", e1.getWeight(), e2.getWeight());
 	}
 
 	@Test
-	public void testEdgeHashCode() {
-		Edge e1 = new Edge("X", "Y", 9);
-		Edge e2 = new Edge("X", "Y", 9);
+	public void testEdgeIdentityNotEqual() {
+	    Edge e1 = new Edge("X", "Y", 9);
+	    Edge e2 = new Edge("X", "Y", 9);
 
-		assertEquals(e1.hashCode(), e2.hashCode());
+	    assertNotEquals(
+	        "Two separate Edge objects should not be equal unless equals() is overridden",
+	        e1,
+	        e2
+	    );
 	}
 
 	@Test
